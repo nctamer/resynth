@@ -21,10 +21,10 @@ def hprModelAnal(x, f0, fs, w, N, H, t, minSineDur, nH, minf0, maxf0, f0et, harm
 	"""
 
 	# perform harmonic analysis
-	hfreq, hmag, hphase = HM.harmonicModelAnal(x, f0, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
+	hfreq, hmag, hphase, len_f0 = HM.harmonicModelAnal(x, f0, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlope, minSineDur)
 	Ns = 512
 	xr = UF.sineSubtraction(x, Ns, H, hfreq, hmag, hphase, fs)    	# subtract sinusoids from original sound
-	return hfreq, hmag, hphase, xr
+	return hfreq, hmag, hphase, xr, len_f0
 	
 def hprModelSynth(hfreq, hmag, hphase, xr, N, H, fs):
 	"""

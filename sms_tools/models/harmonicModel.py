@@ -197,5 +197,5 @@ def harmonicModelAnal(x, f0, fs, w, N, H, t, nH, minf0, maxf0, f0et, harmDevSlop
         pin += H
         f0_idx += 1
     xhfreq = SM.cleaningSineTracks(xhfreq, round(fs * minSineDur / H))  # delete tracks shorter than minSineDur
-    return xhfreq, xhmag, xhphase
+    return xhfreq, xhmag, xhphase, f0_idx
 
