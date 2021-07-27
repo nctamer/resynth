@@ -10,6 +10,7 @@ if os.path.join(Path().absolute(), 'sms_tools', 'models') not in sys.path:
 from sms_tools.models import hpsModel as HPS
 from sms_tools.models import hprModel as HPR
 from sms_tools.models import sineModel as SM
+from sms_tools.models.utilFunctions import refinef0Twm
 import librosa
 import soundfile as sf
 from sklearn.preprocessing import normalize
@@ -98,6 +99,21 @@ class Synthesizer(object):
             return y, pitch_track
 
         if self.model == 'hpr':
+
+            """
+            hfreq, hmag, hphase, xr, len_f0 = HPR.hprModel(
+                x=filtered_audio,
+                fs=self.sample_rate,
+                w=w,
+                N=self.N,
+                t=self.t,
+                nH=self.nH,
+                minf0=self.minf0,
+                maxf0=self.maxf0,
+                f0et=self.f0et,
+            )"""
+
+
             # Get harmonic content from audio using extracted pitch as reference
             hfreq, hmag, hphase, xr, len_f0 = HPR.hprModelAnal(
                 x=filtered_audio,
@@ -114,6 +130,14 @@ class Synthesizer(object):
                 f0et=self.f0et,
                 harmDevSlope=self.harmDevSlope,
             )
+
+            new_pitch = np.zeros_like(pitch_track)
+            f0error = np.inf*np.ones_like(pitch_track)
+            for ind, f0c in enumerate(pitch_track):
+                if f0c > 0:
+                    pfreq = hfreq[ind]
+                    pmag = hmag[ind]
+                    new_pitch[ind], f0error[ind] = refinef0Twm(pfreq, pmag, f0c=f0c, refinement_range_cents=20)
 
             # refine the f0 prediction
             valid_min, valid_out_of, average_over = 6, 10, 30

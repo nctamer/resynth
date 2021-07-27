@@ -255,6 +255,25 @@ def cleaningTrack(track, minTrackLength=3):
 	return cleanTrack
 
 
+def refinef0Twm(pfreq, pmag, f0c, refinement_range_cents=10):
+	"""
+	Function that wraps the f0 detection function TWM, selecting the possible f0 candidates
+	and calling the function TWM with them
+	pfreq, pmag: peak frequencies and magnitudes,
+	f0c: the f0 candidate provided by the pitch_tracker
+	refinement_range_cents: how many cents we are allowed to deviate for the new f0 prediction
+	returns f0: fundamental frequency in Hz
+	"""
+	f0c = f0c * np.power(2, (np.array(range(-refinement_range_cents, 1 + refinement_range_cents))/1200))
+
+	f0, f0error = UF_C.twm(pfreq, pmag, f0c)        # call the TWM function with peak candidates
+
+	if f0>0:                  # accept and return f0 if below max error allowed
+		return f0, f0error
+	else:
+		return 0, np.inf
+
+
 def f0Twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
 	"""
 	Function that wraps the f0 detection function TWM, selecting the possible f0 candidates
