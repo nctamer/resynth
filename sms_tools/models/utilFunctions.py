@@ -257,12 +257,15 @@ def cleaningTrack(track, minTrackLength=3):
 
 def refinef0Twm(pfreq, pmag, f0c, refinement_range_cents=10):
 	"""
-	Function that wraps the f0 detection function TWM, selecting the possible f0 candidates
-	and calling the function TWM with them
-	pfreq, pmag: peak frequencies and magnitudes,
-	f0c: the f0 candidate provided by the pitch_tracker
-	refinement_range_cents: how many cents we are allowed to deviate for the new f0 prediction
-	returns f0: fundamental frequency in Hz
+	Function to refine the f0 estimate with specified cents interval around the original pitch track. Data-driven f0 estimation methods 
+	are good against octave errors and noise. However, they can introduce bias towards the data labels (e.g. western tuning system) 
+	if we do a fine-grained analysis. The purpose of this refinement step is to combine the best of both worlds in a post-processing
+	step, using the sinusoids that we have a direct access.
+	
+	pfreq, pmag: peak frequencies and magnitudes in the analysis window,
+	f0c: the f0 candidate provided by the pitch_tracker (float)
+	refinement_range_cents: how many cents we are allowed to deviate for the new f0 prediction (10c deviation -> pick from 21 candidates)
+	returns f0: the refined fundamental frequency in Hz
 	"""
 	f0c = f0c * np.power(2, (np.array(range(-refinement_range_cents, 1 + refinement_range_cents))/1200))
 
@@ -272,6 +275,9 @@ def refinef0Twm(pfreq, pmag, f0c, refinement_range_cents=10):
 		return f0, f0error
 	else:
 		return 0, np.inf
+
+def twm(pfreq, pmag, f0c):
+	return UF_C.twm(pfreq, pmag, f0c)        # call the TWM function with peak candidates
 
 
 def f0Twm(pfreq, pmag, ef0max, minf0, maxf0, f0t=0):
